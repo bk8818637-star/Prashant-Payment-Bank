@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPI Payment</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="p-6 text-center">
+        <h2 class="text-2xl font-bold" id="payment-title">Confirm Payment</h2>
+      </div>
+
+      <div class="px-6 pb-6 space-y-6" id="payment-content">
+        <div class="flex flex-col items-center space-y-4">
+          <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 flex items-center justify-center text-xl font-bold" id="recipient-avatar">
+            JD
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-semibold" id="recipient-name">John Doe</p>
+            <p class="text-gray-500 text-sm" id="recipient-upi">john.doe@upi</p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Amount</span>
+            <span class="font-bold" id="payment-amount">₹1,500</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Note</span>
+            <span id="payment-note">Dinner bill</span>
+          </div>
+        </div>
+
+        <div class="flex space-x-4 pt-4">
+          <button 
+            id="cancel-btn"
+            class="flex-1 inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            <i data-lucide="x" class="w-4 h-4 mr-2"></i> Cancel
+          </button>
+          <button 
+            id="confirm-btn"
+            class="flex-1 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            <i data-lucide="check" class="w-4 h-4 mr-2"></i> Pay ₹1,500
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Lucide icons
+      lucide.createIcons();
+      
+      const paymentState = {
+        status: 'pending',
+        amount: 1500,
+        recipient: {
+          name: "John Doe",
+          upiId: "john.doe@upi",
+          avatar: "JD"
+        },
+        note: "Dinner bill"
+      };
+
+      const paymentTitle = document.getElementById('payment-title');
+      const paymentContent = document.getElementById('payment-content');
+      const confirmBtn = document.getElementById('confirm-btn');
+      const cancelBtn = document.getElementById('cancel-btn');
+
+      function renderPaymentScreen() {
+        if (paymentState.status === 'pending') {
+          paymentTitle.textContent = 'Confirm Payment';
+          paymentContent.innerHTML = `
+            <div class="flex flex-col items-center space-y-4">
+              <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 flex items-center justify-center text-xl font-bold">
+                ${paymentState.recipient.avatar}
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-semibold">${paymentState.recipient.name}</p>
+                <p class="text-gray-500 text-sm">${paymentState.recipient.upiId}</p>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-gray-500">Amount</span>
+                <span class="font-bold">₹${paymentState.amount.toLocaleString()}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Note</span>
+                <span>${paymentState.note}</span>
+              </div>
+            </div>
+
+            <div class="flex space-x-4 pt-4">
+              <button 
+                id="cancel-btn"
+                class="flex-1 inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <i data-lucide="x" class="w-4 h-4 mr-2"></i> Cancel
+              </button>
+              <button 
+                id="confirm-btn"
+                class="flex-1 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <i data-lucide="check" class="w-4 h-4 mr-2"></i> Pay ₹${paymentState.amount}
+              </button>
+            </div>
+          `;
+        } else if (paymentState.status === 'success') {
+          paymentTitle.textContent = 'Payment Successful';
+          paymentContent.innerHTML = `
+            <div class="text-center space-y-4">
+              <div class="mx-auto bg-green-100 rounded-full p-4 w-fit">
+                <i data-lucide="check" class="h-8 w-8 text-green-600"></i>
+              </div>
+              <p class="text-lg font-semibold">₹${paymentState.amount} paid to ${paymentState.recipient.name}</p>
+              <p class="text-gray-500">Transaction ID: UPI${Math.random().toString(36).substring(2, 10).toUpperCase()}</p>
+              <button 
+                id="reset-btn"
+                class="w-full inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Make Another Payment
+              </button>
+            </div>
+          `;
+        } else {
+          paymentTitle.textContent = 'Payment Cancelled';
+          paymentContent.innerHTML = `
+            <div class="text-center space-y-4">
+              <div class="mx-auto bg-red-100 rounded-full p-4 w-fit">
+                <i data-lucide="x" class="h-8 w-8 text-red-600"></i>
+              </div>
+              <p class="text-lg font-semibold">Payment Cancelled</p>
+              <p class="text-gray-500">You cancelled the payment of ₹${paymentState.amount}</p>
+              <button 
+                id="reset-btn"
+                class="w-full inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Try Again
+              </button>
+            </div>
+          `;
+        }
+
+        // Re-attach event listeners
+        if (paymentState.status === 'pending') {
+          document.getElementById('confirm-btn').addEventListener('click', handleConfirm);
+          document.getElementById('cancel-btn').addEventListener('click', handleCancel);
+        } else {
+          document.getElementById('reset-btn').addEventListener('click', resetPayment);
+        }
+
+        // Refresh icons
+        lucide.createIcons();
+      }
+
+      function handleConfirm() {
+        paymentState.status = 'success';
+        renderPaymentScreen();
+      }
+
+      function handleCancel() {
+        paymentState.status = 'cancelled';
+        renderPaymentScreen();
+      }
+
+      function resetPayment() {
+        paymentState.status = 'pending';
+        renderPaymentScreen();
+      }
+
+      // Initial event listeners
+      confirmBtn.addEventListener('click', handleConfirm);
+      cancelBtn.addEventListener('click', handleCancel);
+    });
+  </script>
+</body>
+</html>

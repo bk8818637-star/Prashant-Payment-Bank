@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPI Payment</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .error-border {
+      border-color: #ef4444;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-blue-100 p-2 rounded-full">
+          <i data-lucide="indian-rupee" class="text-blue-600 w-6 h-6"></i>
+        </div>
+        <h2 class="text-2xl font-bold">UPI Payment</h2>
+      </div>
+
+      <div id="success-message" class="hidden text-center py-8">
+        <div class="bg-green-100 rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="indian-rupee" class="text-green-600 w-8 h-8"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Payment Successful!</h3>
+        <p id="success-details" class="text-gray-600 mb-6"></p>
+        <button id="reset-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition">
+          Make Another Payment
+        </button>
+      </div>
+
+      <form id="payment-form" class="space-y-4">
+        <div class="space-y-2">
+          <label for="upiId" class="flex items-center gap-2 text-sm font-medium">
+            <i data-lucide="user" class="text-gray-500 w-4 h-4"></i>
+            UPI ID
+          </label>
+          <input
+            id="upiId"
+            type="text"
+            placeholder="name@upi"
+            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <p id="upi-error" class="text-red-500 text-sm hidden"></p>
+        </div>
+
+        <div class="space-y-2">
+          <label for="amount" class="flex items-center gap-2 text-sm font-medium">
+            <i data-lucide="indian-rupee" class="text-gray-500 w-4 h-4"></i>
+            Amount
+          </label>
+          <input
+            id="amount"
+            type="number"
+            placeholder="0.00"
+            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <p id="amount-error" class="text-red-500 text-sm hidden"></p>
+        </div>
+
+        <button
+          id="submit-btn"
+          type="submit"
+          class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+          disabled
+        >
+          Pay Now
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      
+      const form = document.getElementById('payment-form');
+      const upiInput = document.getElementById('upiId');
+      const amountInput = document.getElementById('amount');
+      const upiError = document.getElementById('upi-error');
+      const amountError = document.getElementById('amount-error');
+      const submitBtn = document.getElementById('submit-btn');
+      const successMessage = document.getElementById('success-message');
+      const successDetails = document.getElementById('success-details');
+      const resetBtn = document.getElementById('reset-btn');
+      
+      function validateUPI(id) {
+        const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
+        return upiRegex.test(id);
+      }
+      
+      function validateAmount(amt) {
+        if (!amt) return false;
+        const num = parseFloat(amt);
+        return !isNaN(num) && num > 0;
+      }
+      
+      function validateForm() {
+        const isUpiValid = validateUPI(upiInput.value);
+        const isAmountValid = validateAmount(amountInput.value);
+        
+        submitBtn.disabled = !(isUpiValid && isAmountValid);
+      }
+      
+      upiInput.addEventListener('input', () => {
+        if (!validateUPI(upiInput.value) && upiInput.value) {
+          upiError.textContent = 'Please enter a valid UPI ID (e.g. name@upi)';
+          upiError.classList.remove('hidden');
+          upiInput.classList.add('error-border');
+        } else {
+          upiError.classList.add('hidden');
+          upiInput.classList.remove('error-border');
+        }
+        validateForm();
+      });
+      
+      amountInput.addEventListener('input', () => {
+        if (!validateAmount(amountInput.value) && amountInput.value) {
+          amountError.textContent = 'Please enter a valid amount greater than 0';
+          amountError.classList.remove('hidden');
+          amountInput.classList.add('error-border');
+        } else {
+          amountError.classList.add('hidden');
+          amountInput.classList.remove('error-border');
+        }
+        validateForm();
+      });
+      
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const isUpiValid = validateUPI(upiInput.value);
+        const isAmountValid = validateAmount(amountInput.value);
+        
+        if (isUpiValid && isAmountValid) {
+          successDetails.textContent = `₹${amountInput.value} sent to ${upiInput.value}`;
+          form.classList.add('hidden');
+          successMessage.classList.remove('hidden');
+        }
+      });
+      
+      resetBtn.addEventListener('click', () => {
+        upiInput.value = '';
+        amountInput.value = '';
+        upiError.classList.add('hidden');
+        amountError.classList.add('hidden');
+        upiInput.classList.remove('error-border');
+        amountInput.classList.remove('error-border');
+        submitBtn.disabled = true;
+        form.classList.remove('hidden');
+        successMessage.classList.add('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
